@@ -157,11 +157,14 @@ const embed = new Discord.RichEmbed()
 	.addBlankField(true)
 	.setDescription(currTB)
 
+//Testing the update message. Try to update the message, avoid creating new messages
+const reactionFilter = (reaction, user) => reaction.emoji.name === "ayy";
 
 const sampleEmbed = new Discord.RichEmbed()
 	.setTitle("This is a sample embed testing the changes when hit the react emoji")
 	.addBlankField(true)
-	.set
+	.setDescription("Somthing in here")
+
 
 /////////////////////////////
 bot.on("message", async message => {
@@ -183,9 +186,13 @@ bot.on("message", async message => {
 
 	if(cmd === `${prefix}play`){
 		try {
-			play(currTB, parseInt(argsM[1]));
+			if(argsM[1]){
+				play(currTB, parseInt(argsM[1]));
 			embed.setDescription(currTB);
-			message.channel.send({embed});
+			message.channel.send({embed})
+		}
+		else
+			message.channel.send("Please enter the steps after \"play\"");
 		} catch(err){
 			message.channel.send(err);
 		}
@@ -209,18 +216,29 @@ bot.on("message", async message => {
 		embed.setDescription(currTB);
 		message.channel.send({embed})
 		.then(sentEmbed => {
-			sentEmbed.react(reaction_numbers[0]);
-			sentEmbed.react(reaction_numbers[1]);
-			sentEmbed.react(reaction_numbers[2]);
-			sentEmbed.react(reaction_numbers[3]);
-			sentEmbed.react(reaction_numbers[4]);
+			// sentEmbed.react(reaction_numbers[0]);
+			sentEmbed.react(reaction_numbers[1]).then(() => {
+				play(currTB, 1);
+				embed.setDescription(currTB);
+				message.channel.send({embed})
+			});
+			// sentEmbed.react(reaction_numbers[2]);
+			// sentEmbed.react(reaction_numbers[3]);
+			// sentEmbed.react(reaction_numbers[4]);
 		});
-
 	}
 
 	if(cmd === `${prefix}emoji`){
 		const emoji = client.emojis.find(emoji => emoji.name === "ayy");
 		message.channel.send(`${emoji} is a emoji`);
+	}
+
+	if(cmd === `${prefix}reset`){
+		message.channel.send(sampleEmbed);
+	}
+
+	if(cmd === `${prefix}update`){
+		message.channel.edit(sampleEmbed.setDescription(argsM[1]));
 	}
 
 });
