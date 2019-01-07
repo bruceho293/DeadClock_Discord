@@ -68,8 +68,6 @@ function play(array, num){
 	var sC = 4;
 	var tC = 7;
 
-
-
 	for (var i = 2; i < 9; i ++){
 		var currIndex = array[i].indexOf(":black_circle:");
 		if(currIndex == -1){
@@ -83,12 +81,9 @@ function play(array, num){
   }
 	array[currBR][currBC] = ":large_blue_circle:";
 
-
 	if(num < 0){
 		side = -1;
 	}
-
-
 	do{
 		if(num > 0){
 			if(fR < currBR && currBR <= sR && fC <= currBC && currBC < sC){
@@ -143,6 +138,8 @@ function play(array, num){
 
 function start(array){
 	array[5][1] = ":black_circle:";
+	var randomMoves = Math.abs(Math.random() * 12);
+	play(currTB, randomMoves);
 }
 
 var currTB = makeTb();
@@ -213,19 +210,30 @@ bot.on("message", async message => {
 
 	if(cmd === 	`${prefix}game`){
 		currTB = makeTb();
+		start(currTB);
 		embed.setDescription(currTB);
-		message.channel.send({embed})
-		.then(sentEmbed => {
-			// sentEmbed.react(reaction_numbers[0]);
-			sentEmbed.react(reaction_numbers[1]).then(() => {
-				play(currTB, 1);
-				embed.setDescription(currTB);
-				message.channel.send({embed})
-			});
+		message.channel.send({embed}).then(message => {
+			message.react(reaction_numbers[1]).then(MessageReaction => {
+				message.react(reaction_numbers[2]).then(MessageReaction => {
+					message.react(reaction_numbers[3]).then(MessageReaction =>{
+						message.react(reaction_numbers[4]).then(MessageReaction => {
+						}).catch();
+					}).catch();
+				}).catch();
+			}).catch();
+		})
+		// .then(sentEmbed => {
+		// 	// sentEmbed.react(reaction_numbers[0]);
+		// 	sentEmbed.react(reaction_numbers[1]).then(() => {
+		// 		play(currTB, 1);
+		// 		embed.setDescription(currTB);
+		// 		message.channel.send({embed})
+		// 	});
 			// sentEmbed.react(reaction_numbers[2]);
 			// sentEmbed.react(reaction_numbers[3]);
 			// sentEmbed.react(reaction_numbers[4]);
-		});
+		// });
+
 	}
 
 	if(cmd === `${prefix}emoji`){
@@ -241,6 +249,24 @@ bot.on("message", async message => {
 		message.channel.edit(sampleEmbed.setDescription(argsM[1]));
 	}
 
+});
+
+bot.on("messageReactionAdd",(messageReaction) => {
+	if(messageReaction.emoji.name == reaction_numbers[1]){
+		play(currTB, 1);
+	}
+	else if (messageReaction.emoji.name == reaction_numbers[2]){
+		play(currTB, 2);
+	}
+	else if (messageReaction.emoji.name == reaction_numbers[3]){
+		play(currTB, -1);
+	}
+	else if (messageReaction.emoji.name == reaction_numbers[4]){
+		play(currTB, -2);
+	}
+
+	embed.setDescription(currTB);
+	messageReaction.message.edit({embed});
 });
 
 bot.login(botSettings.token);
