@@ -4,34 +4,30 @@ const prefix = botSettings.prefix;
 const bot = new Discord.Client({disableEveryone: true});
 
 
+
+bot.on("ready", async () => {
+	console.log(`Bot is ready! ${bot.user.username}`);
+	bot.generateInvite(["ADMINISTRATOR"]).then(link => {
+		console.log(link);
+	}).catch(err => {
+		console.log(err.stack);
+	});
+});
+
 //EMOJI FOR number;
 var reaction_numbers = ["\u0030\u20E3","\u0031\u20E3","\u0032\u20E3","\u0033\u20E3","\u0034\u20E3","\u0035\u20E3", "\u0036\u20E3","\u0037\u20E3","\u0038\u20E3","\u0039\u20E3"]
-
+var currTB;
 //Start of the game
 
 
 //assign clock positions with no _clock. Variables that have _clock will store the position in 2D array.
-let playerPosition = random(), hourPosition = random(), minPosition = random(), secPosition = random();
-start(currTB, playerPosition, ":large_blue_circle")
+let playerPosition = random(), hourPosition = random1(playerPosition), minPosition = random1(playerPosition), secPosition = random1(playerPosition);
+
 //SetUp Values
 let life = 2, flashlight = 5, level = 1, difficulty = 0;
 
 //assign different positions for bots
 var a = [1,2,3,4,5,6,7,8,9,10,11,12];
-var pos_clock = [
-	[3, 5],
-	[4, 6],
-	[5, 7],
-	[6, 6],
-	[7, 5],
-	[8, 4],
-	[7, 3],
-	[6, 2],
-	[5, 1],
-	[4, 2],
-	[3, 3],
-	[2, 4]
-]
 
 var n;
 var r=[];
@@ -42,7 +38,7 @@ for (n=1; n<=5; ++n)
     a[i] = a[12-n];
   }
 let bot1 = r[0], bot2 = r[1], bot3 = r[2], bot4 = r[3], bot5 = r[4];
-var bot1_clock = pos_clock[bot1 - 1], bot2_clock = pos_clock[bot2 - 1], bot3_clock = pos_clock[bot3 - 1], bot4_clock = pos_clock[bot3 - 1], bot5_clock = pos_clock[bot5 - 1];
+// var bot1_clock = pos_clock[bot1 - 1], bot2_clock = pos_clock[bot2 - 1], bot3_clock = pos_clock[bot3 - 1], bot4_clock = pos_clock[bot3 - 1], bot5_clock = pos_clock[bot5 - 1];
 
 //assign different positions for snake/flashlight
 var r=[];
@@ -53,7 +49,7 @@ for (n=1; n<=3; ++n)
     a[i] = a[12-n];
   }
 let snake1 = r[0], snake2 = r[1], flash = r[2];
-var snake1_clock = pos_clock[snake1 - 1], snake2_clock = pos_clock[snake2 - 1], flash = pos_clock[flash - 1];
+// var snake1_clock = pos_clock[snake1 - 1], snake2_clock = pos_clock[snake2 - 1], flash_clock = pos_clock[flash - 1];
 
 
 var instruction_1 = "🤖: Okay, let's go over some rules. You are trapped inside a clock 🕰️(The position goes from 1~12).Your goal is to survive certain amount of levels (depending on the difficutly).";
@@ -66,127 +62,192 @@ var instruction_7 = "If you think you are brave enough to test your knowledge, l
 var instruction_8 = "Press 1 to move up one time, 2 to move up twice, 3 to move down one time and 4 to move down twice";
 
 
-var content = "";
+var content = "Welcome to DeadClock";
 //Functions
 
 //Generates random values from 1~12
 
 //Game mechanics
 function random() {
-  return Math.floor(Math.random() * 11)+1
+  return Math.floor(Math.random() * 11)+1;
 }
+
+function random1(playerPosition){
+	var position = random();
+	if(position == playerPosition)
+		return position + Math.floor(Math.random() * 6) + 3;
+}
+
 function random3() {
-  return Math.floor(Math.random() * 2)+1
+  return Math.floor(Math.random() * 2)+1;
 }
 
-function setUp(snake1, snake2, flashlight, flash, difficulty, bot1, bot2, bot3, bot4, bot5, life, level, playerPosition, hourPosition, minPosition, secPosition){
- 	const filt = (msg) => (msg.author.id === message.author.id) && ["1","2","3"].includes(msg.content);
-	const opts = { maxMatches: 1, time: 60000, errors: [ 'time' ] }
+function setUp(snake1, snake2, bot1, bot2, bot3, bot4, bot5, life, playerPosition, hourPosition, minPosition, secPosition){
+	var n;
+	var r=[];
+	for (n=1; n<=5; ++n)
+	  {
+	    var i = Math.floor((Math.random() * (12-n)) + 1);
+	    r.push(a[i]);
+	    a[i] = a[12-n];
+	  }
+	bot1 = r[0], bot2 = r[1], bot3 = r[2], bot4 = r[3], bot5 = r[4];
 
-	//Decides the difficulty
- 	message.channel.send("🤖: 'Please select the difficulty. " + "\n1: Easy👶[5 Levels, Tells your starting and clock positions, +1,000 EXP]" + "\n2: Normal👦[5 Levels, Tells your starting position, +5,000 EXP]" + "\n3: Hard👹[10 Levels, Does not tell you anything, +10,000 EXP]" +  "\n`You have a minute to decide`");
+	var r=[];
+	for (n=1; n<=3; ++n)
+	  {
+	    var i = Math.floor((Math.random() * (12-n)) + 1);
+	    r.push(a[i]);
+	    a[i] = a[12-n];
+	  }
+  snake1 = r[0], snake2 = r[1], flash = r[2];
 
-	message.channel.awaitMessages(filt, opts)
-	.then(col => {
-		const m = col.first().content
-		const val1 = m === "1";
-		const val2 = m === "2";
-		const val3 = m === "3";
-	if(val1) {
-		message.channel.send("🤖: 'You have selected an easy difficulty👶'" + `\n🤖: 'You have spawned on position ${playerPosition}, hour-hand on position ${hourPosition}, minute-hand on position ${minPosition}, second-hand on position ${secPosition},'`);
-		difficulty = 0;
-	 	}
-		else if(val2) {
-	 	message.channel.send("🤖: 'You have selected a normal difficulty🧑'" + `\n🤖: 'You have spawned on position ${playerPosition}'`);
-	 	difficulty = 1;
-		if (playerPosition == hourPosition || playerPosition == minPosition || secPosition == hourPosition || playerPosition-1 == hourPosition || playerPosition-1 == minPosition || playerPosition-1 == secPosition || playerPosition+1 == hourPosition || playerPosition+1 == minPosition || playerPosition+1 == secPosition){
-			message.channel.send(`🤖: ⚠️!!! WARNING!!!⚠️` + `\n'Watch out! There is something near you'`);
-			message.channel.send(`😣: I can hear the clock... but I can't tell if it's coming from above, below, or here because of echo...'`);
-		}
-		else{
-		 	message.channel.send(`🤖: 'It seems like there isn't anything near you yet'`);
-		 	}
-		}
-	 else {
-			message.channel.send("🤖: 'You have selected a hard difficulty👹'" + `\n🤖: 'No extra hints will be given'`);
-			difficulty = 2;
-		}
-		check(snake1, snake2, flashlight, flash, difficulty, bot1, bot2, bot3, bot4, bot5, life, level, playerPosition, hourPosition, minPosition, secPosition);
-	})
-	.catch(err => {
-		 message.channel.send("🤖: 'You took too long! The game has ended 😥'");
-	})
+	hourPosition = random1(playerPosition), minPosition = random1(playerPosition), secPosition = random1(playerPosition);
 }
 
-function quote1(bot1) {
-  	if (bot1 % 1 == 0){
-      message.channel.send("🐮: 'Now I'm ANGRY!'" + "\n😨: 'Okay... Chill there big cow'");
-    }
-    else {
-      message.channel.send("😱: 'I see a dead Alistar over there...'");
-    }
+function check(tb, direction, snake1, snake2, flashlight, flash, difficulty, bot1, bot2, bot3, bot4, bot5, life, level, playerPosition, hourPosition, minPosition, secPosition){
+	var checkingFromPlayerPos = playerPosition + direction;
+	if(checkingFromPlayerPos == 13){
+		checkingFromPlayerPos = 1;
+	} else if (checkingFromPlayerPos == 0){
+		checkingFromPlayerPos = 12;
+	}
+
+	// var corrPosition = (checkingFromPlayerPos == bot1) ? bot1 :
+	// ((checkingFromPlayerPos == bot2) ? bot2 :
+	// ((checkingFromPlayerPos == bot3) ? bot3 :
+	// ((checkingFromPlayerPos == bot4) ? bot4 :
+	// ((checkingFromPlayerPos == bot5) ? bot5 :
+	// ((checkingFromPlayerPos == hourPosition) ? hourPosition :
+	// ((checkingFromPlayerPos == minPosition) ? minPosition :
+	// ((checkingFromPlayerPos == secPosition) ? secPosition : 0)))))));
+	//
+	var corrPosition = pos_clock[checkingFromPlayerPos - 1];
+	if(checkingFromPlayerPos == bot1){
+		tb[corrPosition[0]][corrPosition[1]] = "🐮";
+	}
+	else if (checkingFromPlayerPos == bot2){
+		tb[corrPosition[0]][corrPosition[1]] = "🐵";
+	}
+	else if (checkingFromPlayerPos == bot3){
+		tb[corrPosition[0]][corrPosition[1]] = "🧟";
+	}
+	else if (checkingFromPlayerPos == bot4){
+		tb[corrPosition[0]][corrPosition[1]] = "🦅";
+	}
+	else if (checkingFromPlayerPos == bot5){
+		tb[corrPosition[0]][corrPosition[1]] = "🐀";
+	}
+	else if (checkingFromPlayerPos == hourPosition){
+		tb[corrPosition[0]][corrPosition[1]] = ":red_circle:";
+	}
+	else if (checkingFromPlayerPos == minPosition){
+		tb[corrPosition[0]][corrPosition[1]] = ":red_circle:";
+	}
+	else if (checkingFromPlayerPos == secPosition){
+		tb[corrPosition[0]][corrPosition[1]] = ":red_circle:";
+	} else {
+		tb[corrPosition[0]][corrPosition[1]] = ":white_circle:";
+	}
 }
 
-function quote2(bot2, hourPosition, minPosition, secPosition) {
-    if (bot2 % 1 == 0){
-    	if (bot2+1 == hourPosition ||bot2+1 == minPosition || bot2+1 == secPosition){
-        message.channel.send("🐵: 'Been waiting for this!'" + "\n🐵: 'I will tell you that something is right above me!'" + "\n😁: 'OMG Thank you Wukong!'");
-      }
 
-      else if (bot2-1 == hourPosition ||bot2-1 == minPosition || bot2-1 == secPosition){
-        message.channel.send("🐵: 'Been waiting for this!'" + "\n🐵: 'I will tell you that something is right below me!'" + "\n😁: 'OMG Thank you Wukong!'");
-      }
+//Cow
+// function quote1(bot1) {
+//   	if (bot1 % 1 == 0){
+//       message.channel.send("🐮: 'Now I'm ANGRY!'" + "\n😨: 'Okay... Chill there big cow'");
+//     }
+//     else {
+//       message.channel.send("😱: 'I see a dead Alistar over there...'");
+//     }
+// }
 
-      else {
-       	message.channel.send("🐵: 'Hey there! I will tell you that nothing has passed me recently'" + "\n😁: 'OMG Thank you Wukong!'");
-      }
-    }
-    else {
-      message.channel.send("😱: 'I see a dead Wukong over there...'");
-    }
-}
+//Monkey
+// function quote2(bot2, hourPosition, minPosition, secPosition) {
+//     if (bot2 % 1 == 0){
+//     	if (bot2+1 == hourPosition ||bot2+1 == minPosition || bot2+1 == secPosition){
+//         message.channel.send("🐵: 'Been waiting for this!'" + "\n🐵: 'I will tell you that something is right above me!'" + "\n😁: 'OMG Thank you Wukong!'");
+//       }
+//
+//       else if (bot2-1 == hourPosition ||bot2-1 == minPosition || bot2-1 == secPosition){
+//         message.channel.send("🐵: 'Been waiting for this!'" + "\n🐵: 'I will tell you that something is right below me!'" + "\n😁: 'OMG Thank you Wukong!'");
+//       }
+//
+//       else {
+//        	message.channel.send("🐵: 'Hey there! I will tell you that nothing has passed me recently'" + "\n😁: 'OMG Thank you Wukong!'");
+//       }
+//     }
+//     else {
+//       message.channel.send("😱: 'I see a dead Wukong over there...'");
+//     }
+// }
+//
 
-function quote3(bot3) {
-  	if (bot3 % 1 == 0){
-      message.channel.send("🧟: 'Mundo!'" + "\n😌: 'Oh it's just Mundo..'");
-    }
-    else {
-      message.channel.send("😱: 'I see a dead Mundo over there...'" + "\n🧟: 'MUNDO TOO STRONG FOR YOU!'" + "\n😮: 'Dr.Mundo revived...'");
-      bot3 = random();
-    }
-}
+// Mundo
+// function quote3(bot3) {
+//   	if (bot3 % 1 == 0){
+//       message.channel.send("🧟: 'Mundo!'" + "\n😌: 'Oh it's just Mundo..'");
+//     }
+//     else {
+//       message.channel.send("😱: 'I see a dead Mundo over there...'" + "\n🧟: 'MUNDO TOO STRONG FOR YOU!'" + "\n😮: 'Dr.Mundo revived...'");
+//       bot3 = random();
+//     }
+// }
 
-function quote4(bot4, hourPosition, minPosition, secPosition) {
-    if (bot4 % 1 == 0){
-      let highest = 0;
-      if (hourPosition > minPosition && hourPosition > secPosition){
-      	highest = hourPosition;
-      }
-      if (minPosition > hourPosition && minPosition > secPosition){
-        highest = minPosition;
-      }
-      if (secPosition > minPosition && secPosition > hourPosition){
-        highest = secPosition;
-      }
-    	message.channel.send("👁️: 'What do you see up there?'" + `\n🦅: 'I will tell you the highest number the clock is pointing.'` + `'\n I see something at ${highest}'` + "\n😍: 'Sweet! Thanks Quinn!'");
-    	}
-    else {
-      message.channel.send("😱: 'I see a dead Quinn over there...'");
-    }
-}
+//Quinn Bird
+// function quote4(bot4, hourPosition, minPosition, secPosition) {
+//     if (bot4 % 1 == 0){
+//       let highest = 0;
+//       if (hourPosition > minPosition && hourPosition > secPosition){
+//       	highest = hourPosition;
+//       }
+//       if (minPosition > hourPosition && minPosition > secPosition){
+//         highest = minPosition;
+//       }
+//       if (secPosition > minPosition && secPosition > hourPosition){
+//         highest = secPosition;
+//       }
+//     	message.channel.send("👁️: 'What do you see up there?'" + `\n🦅: 'I will tell you the highest number the clock is pointing.'` + `'\n I see something at ${highest}'` + "\n😍: 'Sweet! Thanks Quinn!'");
+//     	}
+//     else {
+//       message.channel.send("😱: 'I see a dead Quinn over there...'");
+//     }
+// }
+//
 
-function quote5(bot5, life) {
-    if (bot5 % 1 == 0){
-      message.channel.send("🐀: 'It's me! Hahahahaa!!'" + "\n🤢: 'YIKES!!! Not good... I got poisoned...'");
-      life--;
-      return life;
-    }
-    else {
-      message.channel.send("😱: 'I see a dead Twitch over there...'");
-    }
+//Rat Twitch
+// function quote5(bot5, life) {
+//     if (bot5 % 1 == 0){
+//       message.channel.send("🐀: 'It's me! Hahahahaa!!'" + "\n🤢: 'YIKES!!! Not good... I got poisoned...'");
+//       life--;
+//       return life;
+//     }
+//     else {
+//       message.channel.send("😱: 'I see a dead Twitch over there...'");
+//     }
+// }
+
+function text_construct(){
+
 }
 
 //Interface of the game
+
+var pos_clock = [
+	[3, 5],//1
+	[4, 6],//2
+	[5, 7],//3
+	[6, 6],//4
+	[7, 5],//5
+	[8, 4],//6
+	[7, 3],//7
+	[6, 2],//8
+	[5, 1],//9
+	[4, 2],//10
+	[3, 3],//11
+	[2, 4]//12
+];
+
 
 //Construct the the clock
 function makeTb(){
@@ -224,7 +285,7 @@ function makeTb(){
 
 //get the position of every characters
 //Movement
-function play(array, num, emoji){
+function play(array, num, emoji, position){
 
 	var currBR, currBC;
 	var side = 1;//Decide if the player is going clockwise or counter clockwise.
@@ -237,16 +298,25 @@ function play(array, num, emoji){
 	var tC = 7;
 
 	for (var i = 2; i < 9; i ++){
-		var currIndex = array[i].indexOf(":large_blue_circle:");
+		var currIndex = array[i].indexOf(emoji);
 		if(currIndex == -1){
 			if(i == 8)
-				throw "error";
+				// throw "error";
+				currBR = pos_clock[position - 1][0];
+				currBC = pos_clock[position - 1][1];
 		} else {
 			currBR = i;
 			currBC = currIndex;
 			break;
 		}
   }
+
+
+
+
+	if(position == playerPosition)
+		resetPlayerSurrounding(array, playerPosition);
+
 	array[currBR][currBC] = ":black_circle:";
 
 	if(num < 0){
@@ -293,59 +363,65 @@ function play(array, num, emoji){
 	} while (nom > 0);
 
 	array[currBR][currBC] = emoji;
+	position += num;
 }
 //End of movement in the clock
 
-function start(array, pos){
+function start(array, pos, emoji){
 // Position 9 is the first place for every characters to appear in the clock before taking notice of their real assigned positions.
-	array[5][1] = ":large_blue_circle:";
+	array[5][1] = emoji;
+
 	//var randomMoves = Math.abs(Math.random() * 12);
 	//play(currTB, randomMoves);
 	var position_on_the_clock = pos - 9;
-	play(currTB, position_on_the_clock);
+	play(currTB, position_on_the_clock, emoji, pos);
 }
+
+function resetPlayerSurrounding(tb, playerPosition){
+		var surr1 = playerPosition - 1;
+		var surr2 = playerPosition + 1;
+
+		var pos_surr1 = pos_clock[surr1 - 1];
+		var pos_surr2 = pos_clock[surr2 - 1];
+
+		tb[pos_surr1[0]][pos_surr1[1]] = ":black_circle:";
+		tb[pos_surr2[0]][pos_surr2[1]] = ":black_circle:";
+}
+
+
 
 //End of the interface
 
 //End of Functions
 
 // Initialize the embeded message
-var currTB = makeTb();
-// const embedIns = new Discord.RichEmbed()
-// 	.setTitle("DeadClock")
-// 	.setAuthor("By Chocolate Rose")
-// 	.setFooter("Fun strategy game on Discord")
-// 	.setDescription("These are things you should know to beat the game")
-// 	.addField("RULES", instruction_1)
-// 	.addField("RULES", instruction_2)
-// 	.addField("RULES", instruction_3)
-// 	.addField("TIP", instruction_4)
-// 	.addField("INFOR", instruction_5)
-// 	.addField("INFOR", instruction_6)
-// 	.addField("INFOR", instruction_7)
-// 	.addField("GAMEPLAY", instruction_8)
 
-const embed = new Discord.RichEmbed()
+const embed_ins = new Discord.RichEmbed()
+	.setTitle("DeadClock")
+	.setAuthor("By Chocolate Rose")
+	.setFooter("Fun strategy game on Discord")
+	.setDescription("These are things you should know to beat the game")
+	.addField("RULES", instruction_1)
+	.addField("RULES", instruction_2)
+	.addField("RULES", instruction_3)
+	.addField("TIP", instruction_4)
+	.addField("INFOR", instruction_5)
+	.addField("INFOR", instruction_6)
+	.addField("INFOR", instruction_7)
+	.addField("GAMEPLAY", instruction_8)
+
+
+
+const embed_game = new Discord.RichEmbed()
 	.setTitle("This is your title, it can hold 256 characters")
 	.setAuthor("Huan Ho (Bruce)")
 	.setColor(0x00AE86)
 	.setDescription(currTB)
-	.addBlankField(true);
-	.setFooter(content);
+	.addBlankField(true)
+	.setFooter(content)
 ////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////
-
-
-
-bot.on("ready", async () => {
-	console.log(`Bot is ready! ${bot.user.username}`);
-	bot.generateInvite(["ADMINISTRATOR"]).then(link => {
-		console.log(link);
-	}).catch(err => {
-		console.log(err.stack);
-	});
-});
 
 bot.on("message", async message => {
 	if(message.author.bot) return;
@@ -358,101 +434,70 @@ bot.on("message", async message => {
 	if(!cmd.startsWith(prefix)) return;
 
 
-	if(cmd === `${prefix}start`){
-		start(currTB);
-		embed.setDescription(currTB)
-		message.channel.send({embed});
-	}
 
-	if(cmd === `${prefix}play`){
-		try {
-			if(argsM[1]){
-				play(currTB, parseInt(argsM[1]));
-			embed.setDescription(currTB);
-			message.channel.send({embed})
-		}
-		else
-			message.channel.send("Please enter the steps after \"play\"");
-		} catch(err){
-			message.channel.send(err);
-		}
-	}
-
-	if(cmd === `${prefix}check`){
-		currTB = makeTb();
-		embed.setDescription(currTB);
-		message.channel.send({embed});
-	}
-
-	if(cmd === `${prefix}gameinfor`){
-		const embedInstruction = new Discord.RichEmbed()
-			.setTitle("DeadClock")
-			.setAuthor("By Chocolate Rose")
-			.setColor(0x00AE86)
-			.setFooter("Fun strategy game on Discord")
-			.addField("RULES", instruction_1)
-			.addField("RULES", instruction_2)
-			.addField("RULES", instruction_3)
-			.addField("TIP", instruction_4)
-			.addField("INFOR", instruction_5)
-			.addField("INFOR", instruction_6)
-			.addField("INFOR", instruction_7)
-			.addField("GAMEPLAY", instruction_8)
-		message.channel.send({embedInstruction});
-	}
 
 	if(cmd === 	`${prefix}game`){
 		currTB = makeTb();
-		start(currTB);
-		embed.setDescription(currTB);
-		message.channel.send({embed}).then(message => {
+		start(currTB, playerPosition, ":large_blue_circle:");
+		// start(currTB, hourPosition, ":red_circle:");
+		// start(currTB, minPosition, ":red_circle:");
+		// start(currTB, secPosition, ":red_circle:");
+		embed_game.setFooter(content);
+		embed_game.setDescription(currTB);
+		message.channel.send({embed: embed_game}).then(message => {
 			message.react(reaction_numbers[1]).then(MessageReaction => {
 				message.react(reaction_numbers[2]).then(MessageReaction => {
 					message.react(reaction_numbers[3]).then(MessageReaction =>{
 						message.react(reaction_numbers[4]).then(MessageReaction => {
-							message.react("🤚").then(MessageReaction => {
-								message.react(":no_entry:").then(MessageReaction => {
-									message.react(":a:").then(MessageReaction => {
-
-									}).catch();
-								}).catch();
-							}).catch();
+							// message.react("🤚").then(MessageReaction => {
+							// 	message.react("🔦").then(MessageReaction => {
+							// 		message.react("💡").then(MessageReaction => {
+							// 			message.react("🚨").then(MessageReaction => {
+												text_construct();
+							// 			}).catch();
+							// 		}).catch();
+							// 	}).catch();
+							// }).catch();
 						}).catch();
 					}).catch();
 				}).catch();
 			}).catch();
 		})
+
+		currTB = makeTb();
+		start(currTB, playerPosition, ":large_blue_circle:");
+		setUp(snake1, snake2, bot1, bot2, bot3, bot4, bot5, life, playerPosition, hourPosition, minPosition, secPosition);
+		embed_game.setDescription(currTB);
+		message.channel.edit({embed: embed_game});
 	}
 
-	if(cmd === `${prefix}emoji`){
-		const emoji = client.emojis.find(emoji => emoji.name === "ayy");
-		message.channel.send(`${emoji} is a emoji`);
-	}
-
-	if(cmd === `${prefix}update`){
-		message.channel.edit(sampleEmbed.setDescription(argsM[1]));
-	}
 });
 
 bot.on("messageReactionAdd",(messageReaction) => {
 	if(messageReaction.emoji.name == reaction_numbers[1]){
-		play(currTB, 1);
+		play(currTB, 1, ":large_blue_circle:", playerPosition);
 	}
 	else if (messageReaction.emoji.name == reaction_numbers[2]){
-		play(currTB, 2);
+		play(currTB, 2, ":large_blue_circle:", playerPosition);
 	}
 	else if (messageReaction.emoji.name == reaction_numbers[3]){
-		play(currTB, -1);
+		play(currTB, -1, ":large_blue_circle:", playerPosition);
 	}
 	else if (messageReaction.emoji.name == reaction_numbers[4]){
-		play(currTB, -2);
+		play(currTB, -2, ":large_blue_circle:", playerPosition);
 	}
-	// else if (messageReaction.emoji.name == "🤚"){
-	//
-	// }
+	else if (messageReaction.emoji.name == "🔦"){
+		check(currTB, 1, snake1, snake2, flashlight, flash, difficulty, bot1, bot2, bot3, bot4, bot5, life, level, playerPosition, hourPosition, minPosition, secPosition);
+	}
+	else if (messageReaction.emoji.name == "💡"){
+		check(currTB, -1, snake1, snake2, flashlight, flash, difficulty, bot1, bot2, bot3, bot4, bot5, life, level, playerPosition, hourPosition, minPosition, secPosition);
+	}
+	else if (messageReaction.emoji.name == "🚨"){
+		check(currTB, 0, snake1, snake2, flashlight, flash, difficulty, bot1, bot2, bot3, bot4, bot5, life, level, playerPosition, hourPosition, minPosition, secPosition);
+	}
 
-	embed.setDescription(currTB);
-	messageReaction.message.edit({embed});
+	embed_game.setDescription(currTB);
+	messageReaction.message.edit({embed: embed_game});
 });
 
 bot.login(botSettings.token);
